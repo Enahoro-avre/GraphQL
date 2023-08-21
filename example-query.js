@@ -1,4 +1,6 @@
 // npm install @graphql-tools/schema
+// install graphQL extension
+// npm install @graphql-tools/load-files
 
 // Query 1
 

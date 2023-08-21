@@ -1,70 +1,27 @@
+const path = require('path')
 const express = require("express");
-const { buildSchema } = require('graphql')
+// const { buildSchema } = require('graphql')
 const { graphqlHTTP } = require('express-graphql')
 
-const schema = buildSchema(`
-    type Query {
-        products: [Product]
-        orders : [Order]
-    }
+const { loadFilesSync } = require("@graphql-tools/load-files")
+const { makeExecutableSchema } = require("@graphql-tools/schema")
 
-    type Product {
-        id: ID!
-        description: String!
-        reviews: [Review]
-        price: Float!
-    }
+const typesArray = loadFilesSync(path.join(__dirname , '**/*.graphql'))
+const resolverArray = loadFilesSync(path.join(__dirname, "**/*.resolver.js"));
 
-    type Review {
-        rating: Int!
-        comment: String
-    }
+const schema = makeExecutableSchema({
+    typeDefs: typesArray,
+    resolvers: resolverArray,
+})
 
-    type Order {
-        date: String!
-        subtotal: Float!
-        items: [OrderItem]
-    }
+// const schema = buildSchema()
 
-    type OrderItem {
-        product: Product!
-        quantity: Int!
-    }
-`)
+// const root = {
+//     products: require('./products/products.model'),
+//     orders: require('./orders/orders.model')
+// };
 
-const root = {
-  products: [
-    {
-      id: "red shoe",
-      description: "red shoe description",
-      price: 42.5,
-    },
-    {
-      id: "blue shoe",
-      description: "blue shoe description",
-      price: 52.5,
-    },
-  ],
-
-  orders: [
-    {
-        date: '2005-5-23',
-        subtotal: 65.64,
-        items: [
-            {
-                product: {
-                        id: 'red shoe',
-                        description: 'OLD red shoe',
-                        price: 45.11
-
-                },
-                quantity:2,
-            }
-        ]
-    }
-  ]
-};
-const app = express();
+const app = express()
 
 app.get("/", (req, res) => {
   res.send("GraphQL server is here ....");
@@ -72,7 +29,7 @@ app.get("/", (req, res) => {
 
 app.use('/graphql' , graphqlHTTP({
     schema: schema,
-    rootValue: root,
+    // rootValue: root,
     graphiql: true
 }))
 
